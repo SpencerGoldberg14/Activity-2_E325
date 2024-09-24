@@ -15,7 +15,6 @@ floods <- inner_join(streamH, siteinfo, by="siteID")
 # In-Class Prompt 2: parse date for the Floods data frame
 streamH$dateF <- ymd_hm(streamH$datetime,
                         tz="America/New_York")
-year(streamH$dateF)
 
 # In-Class Prompt 3: find the earliest date that each river reached the flood stage
 flood_date <- floods %>%
@@ -24,55 +23,72 @@ flood_date <- floods %>%
   summarize(min_date=min(dateF))
 
 # HW Question 1: Make a separate plot of the stream stage data for each river
-plot.stream.stage <- (siteID = 2256500,
-                      si)
+# new data frame for palmade 
+palmade <- floods[floods$siteID == 2256500,]
 
-example <- floods %>%
-  filter(gheight.ft >= 10)
-plot(peace$dateF, peace$gheight.ft, type="l")
+# plot palmade
+plot(palmade$dateF, 
+     palmade$gheight.ft,
+     type = "p",
+     xlab = "Date",
+     ylab = "Stream Stage (ft)",
+     main = "Palmade Stream Stage Data")
 
+# new data frame for trilby
+trilby <- floods[floods$siteID == 2312000,]
 
+# plot trilby
+plot(trilby$dateF,
+     trilby$gheight.ft,
+     type = "p",
+     xlab = "Date",
+     ylab = "Stream Stage (ft)",
+     main = "Trilby Stream Stage Data")
 
-mutate_floods <- simple_floods %>%
-  mutate(gheight.m = gheight.ft * .3048,
-         flood.m = flood.ft *.3048)
+# new data frame for fort white
+fort_white <- floods[floods$siteID == 2322500,]
 
-# join site info to steam gauge height
-floods <- full_join(streamH, siteinfo, by="siteID")
+# plot fort white
+plot(fort_white$dateF,
+     fort_white$gheight.ft,
+     type = "p",
+     xlab = "Date",
+     ylab = "Stream Stage (ft)",
+     main = "Fort White Stream Stage Data")
 
-peace <- floods %>% 
-  filter(siteID == 2295637)
+# new data frame for zolfo springs
+zolfo_springs <- floods[floods$siteID == 2295637,]
 
-example <- floods %>%
-  filter(gheight.ft >= 10)
-plot(peace$dateF, peace$gheight.ft, type="l")
+# plot zolfo springs
+plot(zolfo_springs$dateF,
+     zolfo_springs$gheight.ft,
+     type = "p",
+     xlab = "Date",
+     ylab = "Stream Stage (ft)",
+     main = "Zolfo Springs Stream Stage Data")
 
-max_ht <- floods %>%
+# HW Question 2: What was the earliest date of occurrence for each flood category in each river? 
+flood_action <- floods %>%
+  filter(gheight.ft>=action.ft) %>%
   group_by(names) %>%
-  summarize(max_height_ft=max(gheight.ft, na.rm=TRUE),
-            mean_ft = mean(gheight.ft, na.rm=TRUE))
+  summarize(min_date=min(dateF))
 
-#prompt 3: What was the earliest date that each river reached the flood stage?
-flood_date <- floods %>%
+flood_flood <- floods %>%
   filter(gheight.ft>=flood.ft) %>%
   group_by(names) %>%
   summarize(min_date=min(dateF))
 
-#homework part 1: group 5
-which(floodStage$height.ft == 10)
-which(floodStage$siteID == 2312000)
+flood_moderate <- floods %>%
+  filter(gheight.ft>=moderate.ft) %>%
+  group_by(names) %>%
+  summarize(min_date=min(dateF))
 
-# use select to create a df without variables
-simple_floods <- floods %>%
-  select(-c('agency', 'siteID', 'datetime', 'moderate.ft', 'action.ft'))
+flood_major <- floods %>%
+  filter(gheight.ft>=major.ft) %>%
+  group_by(names) %>%
+  summarize(min_date=min(dateF))
 
-# use mutate to create columns for metric units
-mutate_floods <- simple_floods %>%
-  mutate(gheight.m = gheight.ft * .3048,
-         flood.m = flood.ft *.3048)
-
-# simple histogram 
-Sante_Fe <- floods %>% filter(siteID = 232500)
-hist(Sante_Fe$gheight.ft,
-     main = xyz,
-     xlab = c(0,16))
+# HW Question 3: Which river had the highest stream stage above its listed height in the major flood category?
+stream_major <- floods$gheight.ft - floods$major.ft
+river_major <- floods$names[which(stream_major == max(stream_major))]
+print(river_major)
